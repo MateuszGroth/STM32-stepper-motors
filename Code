@@ -1,0 +1,351 @@
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+#include "stm32f4xx_hal.h"
+TIM_HandleTypeDef htim10;
+int x=0;
+int n=0;
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_TIM10_Init(void);
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+	if(htim->Instance == TIM10){    /*sprawdzanie czy zegar TIM10 wysyła sygnał*/
+	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12); /*jeśli tak - zmień stan portu */
+	}
+}
+int main(void)
+{
+	int i=0;
+  HAL_Init();
+  SystemClock_Config();
+  MX_GPIO_Init();
+  MX_TIM10_Init();
+  HAL_TIM_Base_Start_IT(&htim10);
+  while (1)
+  {
+if(HAL_GPIO_ReadPin(k0_GPIO_Port, k0_Pin)==GPIO_PIN_RESET){   /* sprawdzanie stanu wysyłanego przez przycisk*/
+HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);  /*niski - utrzymuj stan niski na wejściu EN*/
+}else{
+HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);    /*wysoki - ustaw stan wysoki na wejście DIR*/
+HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);  /*wysoki - utrzymuj stan niski na wejściu EN*/
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12)); /*wysyłaj sygnał prostokątny*/
+}																				  /*na wejście  STEP*/
+		if(HAL_GPIO_ReadPin(k4_GPIO_Port, k4_Pin)==GPIO_PIN_RESET){
+			  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
+		  }else{
+			  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12));
+		  }
+		if(HAL_GPIO_ReadPin(k1_GPIO_Port, k1_Pin)==GPIO_PIN_RESET){
+			  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+				}else{
+			  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_SET);
+		      HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12));
+					}
+		if(HAL_GPIO_ReadPin(k5_GPIO_Port, k5_Pin)==GPIO_PIN_RESET){
+			  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+					}else{
+			  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12));
+						}
+		if(HAL_GPIO_ReadPin(k2_GPIO_Port, k2_Pin)==GPIO_PIN_RESET){
+			  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
+					}else{
+			  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12));
+						}
+		if(HAL_GPIO_ReadPin(k6_GPIO_Port, k6_Pin)==GPIO_PIN_RESET) {
+			  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
+					}else{
+			  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12));
+						}
+
+		if(HAL_GPIO_ReadPin(krani_GPIO_Port, krani_Pin)==GPIO_PIN_RESET){
+
+				HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12));
+
+					}else{
+
+				  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
+
+
+						}
+		if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_15)==GPIO_PIN_RESET){
+
+			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12));
+
+				}else{
+
+			  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
+
+
+					}
+
+/* sekwencja, w której robot wykonuje tzw. "trójkąty"*/
+				if(x==1){
+					HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET);
+					for(n=0;n<4;n++){
+					HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_RESET);
+					for(i=0;i<30;i++){
+						HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_11);
+						HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_9);
+						HAL_Delay(25);
+						HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_9);
+									 }
+					HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_SET);
+					for(i=0;i<30;i++){
+						HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_11);
+						HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_9);
+						HAL_Delay(25);
+						HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_9);
+									  }
+						}
+				                 }
+/* sekwencja, w której robot wykonuje łuki*/
+//						if(x==1){
+//					HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET); /* caly prawo*/
+//					HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_RESET);
+//					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
+//				for(i=0;i<10;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);/* dlugie dół*/
+//					HAL_Delay(25);
+//								}
+//				for(i=0;i<50;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_11);/* CALY prawo*/
+//					HAL_Delay(25);
+//													 }
+//				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
+//				for(i=0;i<10;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);/* dlugie góra*/
+//					HAL_Delay(25);
+//								}
+//				for(i=0;i<10;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_9);/* maly przod*/
+//					HAL_Delay(25);
+//								}
+//				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
+//				for(i=0;i<10;i++){
+//				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);/* dlugie dół*/
+//					HAL_Delay(25);
+//								}
+//				HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET);
+//				for(i=0;i<50;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_11);/* CALY lewo*/
+//					HAL_Delay(25);
+//								 }
+//				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
+//				for(i=0;i<10;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);/* dlugie góra*/
+//					HAL_Delay(25);
+//								}
+//				for(i=0;i<10;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_9);/* maly przod*/
+//					HAL_Delay(25);
+//								}
+//				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
+//				for(i=0;i<10;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);/* dlugie dół*/
+//					HAL_Delay(25);
+//								}
+//				HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET);
+//				for(i=0;i<50;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_11);/* CALY prawo*/
+//					HAL_Delay(25);
+//								 }
+//				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
+//				for(i=0;i<10;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);/* dlugie góra*/
+//					HAL_Delay(25);
+//								}
+//				for(i=0;i<10;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_9);/* maly przod*/
+//					HAL_Delay(25);
+//								}
+//				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
+//				for(i=0;i<10;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);/* dlugie dół*/
+//					HAL_Delay(25);
+//								}
+//				HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET);
+//				for(i=0;i<50;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_11);/* CALY lewo*/
+//					HAL_Delay(25);
+//								 }
+//				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
+//				for(i=0;i<10;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);/* dlugie góra*/
+//					HAL_Delay(25);
+//								}
+//				for(i=0;i<10;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_9);/* maly przod*/
+//				HAL_Delay(25);
+//								}
+//				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
+//				for(i=0;i<10;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);/* dlugie dół*/
+//					HAL_Delay(25);
+//									}
+//				HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET);
+//				for(i=0;i<50;i++){
+//					HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_11);/* CALY prawo*/
+//					HAL_Delay(25);
+//									}
+//
+//								}
+
+
+				}
+}
+void SystemClock_Config(void)
+{
+
+  RCC_OscInitTypeDef RCC_OscInitStruct;
+  RCC_ClkInitTypeDef RCC_ClkInitStruct;
+  __HAL_RCC_PWR_CLK_ENABLE();
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = 16;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLM = 8;
+  RCC_OscInitStruct.PLL.PLLN = 180;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 2;
+  RCC_OscInitStruct.PLL.PLLR = 2;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+  if (HAL_PWREx_EnableOverDrive() != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+}
+static void MX_TIM10_Init(void)
+{
+  htim10.Instance = TIM10;
+  htim10.Init.Prescaler = 9999;
+  htim10.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim10.Init.Period = 179;
+  htim10.Init.ClockDivision = TIM_CLOCKDIVISION_DIV4;
+  if (HAL_TIM_Base_Init(&htim10) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+}
+static void MX_GPIO_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct;
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOH_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
+  HAL_GPIO_WritePin(GPIOC, enable2_Pin|dir2_Pin|enable3_Pin|dir3_Pin 
+                          |kranii_Pin|krani_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LD2_Pin|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11 
+                          |GPIO_PIN_15, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, step_Pin|dir_Pin|enable_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, g_Pin|GPIO_PIN_10, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET);
+    GPIO_InitStruct.Pin = button_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(button_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin = enable2_Pin|dir2_Pin|enable3_Pin|dir3_Pin 
+                          |g_Pin|GPIO_PIN_10|kranii_Pin|krani_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin = USART_TX_Pin|USART_RX_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin = LD2_Pin|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11 
+                          |GPIO_PIN_12|GPIO_PIN_15;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin = k6_Pin|k0_Pin|k4_Pin|k1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin = k2_Pin|k5_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin = step_Pin|dir_Pin|enable_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin = GPIO_PIN_2;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+  HAL_NVIC_SetPriority(EXTI1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+}
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+	if(GPIO_Pin == button_Pin){
+	if(HAL_GPIO_ReadPin(button_GPIO_Port, button_Pin)==GPIO_PIN_RESET){  /* wywołanie sekwencji*/
+
+			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+			  x=1;
+		  }else{
+
+			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+			  x=0;
+		  }
+	}
+}
+void _Error_Handler(char * file, int line)
+{
+  while(1) 
+  {
+  }
+}
+
+#ifdef USE_FULL_ASSERT
+void assert_failed(uint8_t* file, uint32_t line)
+{
+}
+#endif
+
